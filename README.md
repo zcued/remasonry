@@ -1,5 +1,8 @@
 # remasonry
 
+![](https://travis-ci.org/zcued/remasonry.svg?branch=master)
+![](https://img.shields.io/github/license/zcued/remasonry.svg)
+
 A Masonry Layouts library with React
 
 ## Table of Contents
@@ -22,4 +25,4 @@ local development server using `npm start` or `yarn run start`.
 
 ## Demos
 
-TODO
+- [Simple](https://codesandbox.io/s/88p9y027jj)
