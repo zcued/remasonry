@@ -1,0 +1,23 @@
+{
+  "name": "remasonry",
+  "version": "0.0.0",
+  "description": "a grid layout library with react",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "repository": "git@github.com:zcued/remasonry.git",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^16.4.1",
+    "typescript": "^2.9.2"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

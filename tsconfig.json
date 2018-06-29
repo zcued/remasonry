@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationDir": "lib",
+    "outDir": "lib",
+    "typeRoots": ["./node_modules/@types"],
+    "lib": ["es6", "es2017", "dom"]
+  },
+  "include": ["src/**/*"]
+}
