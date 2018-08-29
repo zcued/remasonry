@@ -5,7 +5,20 @@ body {
   height: 100%;
 }
 
+main {
+  padding: 8px;
+}
+
+main button {
+  margin-bottom: 16px;
+}
+
+main section {
+  padding: 16px;
+}
+
 .marsonry-item {
   text-align: center;
+  width: 100%;
   background-color: pink;
 }

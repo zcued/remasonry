@@ -19,13 +19,15 @@ export default class FetchItems extends React.PureComponent<Props> {
   }
 
   check = () => {
-    const { isAtEnd, isFetching, fetchMore, scrollHeight, scrollTop } = this.props
+    const { containerHeight, isAtEnd, isFetching, fetchMore, scrollHeight, scrollTop } = this.props
 
     if (isAtEnd || isFetching || !fetchMore) {
       return
     }
 
-    if (scrollTop > scrollHeight) {
+    const scrollBuffer = containerHeight * 3
+
+    if (scrollTop + scrollBuffer > scrollHeight) {
       fetchMore()
     }
   }

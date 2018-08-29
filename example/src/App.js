@@ -1,34 +1,63 @@
 import React, { Component } from 'react'
 import Remasonry from 'remasonry'
 
-const items = []
+const items = generateItems(200)
 
-for (let index = 0; index < 100; index++) {
-  items[index] = {
-    title: Math.random()
-      .toString(36)
-      .substr(2)
+function generateItems(count) {
+  let items = []
+  for (let i = 0; i < count; i++) {
+    items[i] = {
+      aspect: 1,
+      height: 100 + Math.random() * 100
+    }
   }
+  return items
 }
 
 class App extends Component {
-  renderItem = ({ data, itemIdx }) => {
+  state = { isHorizontal: true }
+
+  handleToggle = () => {
+    this.setState({ isHorizontal: !this.state.isHorizontal })
+  }
+
+  renderHorizontalItem({ position, itemIdx }) {
     return (
-      <div
-        className="marsonry-item"
-        key={itemIdx}
-        style={{
-          width: 264,
-          height: itemIdx % 2 === 0 ? 264 * 1.5 : 264
-        }}
-      >
-        {data.title}
+      <div className="marsonry-item" key={itemIdx}>
+        <div style={{ height: position ? position.height : 0 }} />
+      </div>
+    )
+  }
+
+  renderItem({ data, itemIdx }) {
+    return (
+      <div className="marsonry-item" key={itemIdx}>
+        <div style={{ height: data.height }} />
       </div>
     )
   }
 
   render() {
-    return <Remasonry items={items} scrollContainer={() => window} renderItem={this.renderItem} />
+    const { isHorizontal } = this.state
+
+    return (
+      <main>
+        <p>Hello Masonry</p>
+        <button onClick={this.handleToggle}>👉 Toggle 👈</button>
+        <section>
+          {isHorizontal ? (
+            <Remasonry
+              items={items}
+              scrollContainer={() => window}
+              layout="horizontal"
+              renderItem={this.renderHorizontalItem}
+            />
+          ) : (
+            <Remasonry items={items} scrollContainer={() => window} renderItem={this.renderItem} />
+          )}
+        </section>
+      </main>
+    )
   }
 }
 

@@ -1,27 +1,38 @@
 import * as React from 'react'
 import { debounce, throttle, getElementHeight, getRelativeScrollTop, getScrollPos } from './util'
-import layout from './layout'
+import DefaultLayout from './layout'
+import HorizontalLayout from './h-layout'
 import Cache from './cache'
 import ScrollContainer from './scroll-container'
 import FetchItems from './fetch-items'
 
-interface Props {
+type Position = { top: number; left: number; width: number; height: number }
+
+interface Props<T> {
   columnWidth?: number
   minCols?: number
   gutterWidth?: number
   cache?: Cache<any>
-  renderItem: ({ data, itemIdx, isMeasuring }: { data: any; itemIdx: number; isMeasuring: boolean }) => JSX.Element
+  renderItem: (data: { data: T; itemIdx: number; position: Position; isMeasuring: boolean }) => JSX.Element
   items: Array<any>
   loadItems?: Function
   virtualize?: boolean
+  layout: 'default' | 'horizontal'
   scrollContainer?: () => HTMLElement | Window
 }
 
-interface State {
+interface State<T> {
   hasPendingMeasurements: boolean
+  items: Array<T>
   isFetching: boolean
   scrollTop: number
   width?: number
+
+  height: number
+  itemsToMeasure: Array<T>
+  itemsToRender: Array<T>
+  measuringPositions: Array<Position>
+  renderPositions: Array<Position>
 }
 
 const RESIZE_DEBOUNCE = 300
@@ -29,18 +40,76 @@ const VIRTUAL_BUFFER_FACTOR = 0.7
 
 const layoutNumberToCssDimension = n => (n !== Infinity ? n : undefined) // tslint:disable-line
 
-class Masonry extends React.Component<Props, State> {
+const CONTAINER_STYLE: {
+  position: any
+  overflow: any
+} = {
+  position: 'relative',
+  overflow: 'hidden'
+}
+
+function layoutClass<T>({ columnWidth, gutterWidth, layout, cache, minCols }: Props<T>, { width }: State<T>) {
+  if (layout === 'horizontal') {
+    return HorizontalLayout({
+      columnWidth,
+      gutterWidth,
+      minCols,
+      width
+    })
+  }
+
+  return DefaultLayout<T>({
+    cache,
+    columnWidth,
+    gutterWidth,
+    minCols,
+    width
+  })
+}
+
+function statesForRendering<T>(props: Props<T>, state: State<T>) {
+  const { cache, minCols } = props
+  const { items } = state
+
+  // Full layout is possible
+  const itemsToRender = items.filter(item => item && cache.has(item))
+
+  const layout = layoutClass(props, state)
+  const renderPositions = layout(itemsToRender)
+  // Math.max() === -Infinity when there are no renderPositions
+  const height = renderPositions.length ? Math.max(...renderPositions.map(pos => pos.top + pos.height)) : 0
+
+  const itemsToMeasure = items.filter(item => item && !cache.has(item)).slice(0, minCols)
+  const measuringPositions = layout(itemsToMeasure)
+
+  return {
+    height,
+    itemsToRender,
+    itemsToMeasure,
+    measuringPositions,
+    renderPositions
+  }
+}
+
+class Masonry<T> extends React.Component<Props<T>, State<T>> {
   static defaultProps = {
     columnWidth: 264,
     cache: new Cache(),
     minCols: 4,
     gutterWidth: 16,
-    virtualize: false
+    virtualize: false,
+    layout: 'default'
   }
 
-  state: State = {
+  state = {
     hasPendingMeasurements: this.props.items.some(item => !!item && !this.props.cache.has(item)),
+    items: this.props.items,
     isFetching: false,
+    height: 0,
+    itemsToRender: [],
+    itemsToMeasure: [],
+    measuringPositions: [],
+    renderPositions: [],
     scrollTop: 0,
     width: undefined
   }
@@ -77,6 +146,47 @@ class Masonry extends React.Component<Props, State> {
     this.measureContainer()
   }, 0)
 
+  static getDerivedStateFromProps<T>(props: Props<T>, state: State<T>) {
+    const { items, cache } = props
+
+    const hasPendingMeasurements = items.some(item => item && !cache.has(item))
+
+    for (let i = 0; i < items.length; i++) {
+      if (state.items[i] === undefined) {
+        return {
+          hasPendingMeasurements,
+          items,
+          isFetching: false
+        }
+      }
+
+      if (items[i] !== state.items[i] || items.length < state.items.length) {
+        return {
+          hasPendingMeasurements,
+          items,
+          isFetching: false
+        }
+      }
+    }
+
+    if (items.length === 0 && state.items.length > 0) {
+      return {
+        hasPendingMeasurements,
+        items,
+        isFetching: false
+      }
+    }
+
+    if (hasPendingMeasurements !== state.hasPendingMeasurements) {
+      return {
+        hasPendingMeasurements,
+        items
+      }
+    }
+
+    return null
+  }
+
   fetchMore = () => {
     const { loadItems } = this.props
     if (loadItems && typeof loadItems === 'function') {
@@ -87,49 +197,6 @@ class Masonry extends React.Component<Props, State> {
         () => loadItems({ from: this.props.items.length })
       )
     }
-  }
-
-  renderMasonryComponent = (itemData: any, idx: number, position: any) => {
-    const { renderItem: Component, virtualize } = this.props
-    const { top, left, width, height } = position
-
-    let isVisible
-    if (this.props.scrollContainer) {
-      const virtualBuffer = this.containerHeight * VIRTUAL_BUFFER_FACTOR
-      const offsetScrollPos = this.state.scrollTop - this.containerOffset
-      const viewportTop = offsetScrollPos - virtualBuffer
-      const viewportBottom = offsetScrollPos + this.containerHeight + virtualBuffer
-
-      isVisible = !(position.top + position.height < viewportTop || position.top > viewportBottom)
-    } else {
-      isVisible = true
-    }
-
-    const itemComponent = (
-      <div
-        key={`item-${idx}`}
-        data-grid-item={true}
-        style={{
-          top: 0,
-          left: 0,
-          position: 'absolute',
-          transition: 'transform 0.2s',
-          transform: `translateX(${left}px) translateY(${top}px)`,
-          WebkitTransform: `translateX(${left}px) translateY(${top}px)`,
-          width: layoutNumberToCssDimension(width),
-          height: layoutNumberToCssDimension(height),
-          ...(virtualize || isVisible ? {} : { display: 'none', transition: 'none' })
-        }}
-      >
-        {React.createElement(Component, {
-          data: itemData,
-          itemIdx: idx,
-          isMeasuring: false
-        })}
-      </div>
-    )
-
-    return virtualize ? (isVisible && itemComponent) || null : itemComponent
   }
 
   componentDidMount() {
@@ -150,41 +217,7 @@ class Masonry extends React.Component<Props, State> {
     this.setState({ scrollTop, width })
   }
 
-  componentWillReceiveProps({ items, cache }: Props) {
-    const hasPendingMeasurements = items.some(item => !cache.has(item))
-    for (let i = 0; i < items.length; i += 1) {
-      if (this.props.items[i] === undefined) {
-        this.setState({
-          hasPendingMeasurements,
-          isFetching: false
-        })
-        return
-      }
-
-      if (items[i] !== this.props.items[i] || items.length < this.props.items.length) {
-        this.setState({
-          hasPendingMeasurements,
-          isFetching: false
-        })
-        return
-      }
-    }
-
-    // Reset items if new items array is empty.
-    if (items.length === 0 && this.props.items.length > 0) {
-      this.setState({
-        hasPendingMeasurements,
-        isFetching: false
-      })
-    } else if (hasPendingMeasurements !== this.state.hasPendingMeasurements) {
-      // make sure we always update hasPendingMeasurements
-      this.setState({
-        hasPendingMeasurements
-      })
-    }
-  }
-
-  componentDidUpdate({  }: Props, prevState: State) {
+  componentDidUpdate({  }: Props<T>, prevState: State<T>) {
     const { items, cache } = this.props
 
     this.measureContainerAsync()
@@ -192,16 +225,25 @@ class Masonry extends React.Component<Props, State> {
     if (prevState.width != null && this.state.width !== prevState.width) {
       cache.reset()
     }
+    // calculate whether we still have pending measurements
     const hasPendingMeasurements = items.some(item => !!item && !cache.has(item))
+
     if (
       hasPendingMeasurements ||
       hasPendingMeasurements !== this.state.hasPendingMeasurements ||
       prevState.width == null
     ) {
       this.insertAnimationFrame = requestAnimationFrame(() => {
+        const renderingStates = statesForRendering(this.props, this.state)
         this.setState({
-          hasPendingMeasurements
+          hasPendingMeasurements,
+          ...renderingStates
         })
+      })
+    } else if (hasPendingMeasurements || prevState.items !== items) {
+      this.insertAnimationFrame = requestAnimationFrame(() => {
+        const renderingStates = statesForRendering(this.props, this.state)
+        this.setState({ ...renderingStates })
       })
     }
   }
@@ -247,17 +289,56 @@ class Masonry extends React.Component<Props, State> {
     this.forceUpdate()
   }
 
-  render() {
-    const { columnWidth, renderItem: Component, gutterWidth, cache, items, minCols } = this.props
-    const { hasPendingMeasurements, width } = this.state
+  renderMasonryComponent = (item: any, idx: number, position: any) => {
+    const { renderItem: Component, virtualize } = this.props
+    const { top, left, width, height } = position
 
-    let measuredLayout = layout({
-      cache,
-      columnWidth,
-      gutterWidth,
-      minCols,
+    let isVisible
+    if (this.props.scrollContainer) {
+      const virtualBuffer = this.containerHeight * VIRTUAL_BUFFER_FACTOR
+      const offsetScrollPos = this.state.scrollTop - this.containerOffset
+      const viewportTop = offsetScrollPos - virtualBuffer
+      const viewportBottom = offsetScrollPos + this.containerHeight + virtualBuffer
+
+      isVisible = !(position.top + position.height < viewportTop || position.top > viewportBottom)
+    } else {
+      isVisible = true
+    }
+
+    const itemComponent = (
+      <div
+        key={`item-${idx}`}
+        data-grid-item={true}
+        style={{
+          top: 0,
+          left: 0,
+          position: 'absolute',
+          transition: 'transform 0.2s',
+          transform: `translateX(${left}px) translateY(${top}px)`,
+          WebkitTransform: `translateX(${left}px) translateY(${top}px)`,
+          width: layoutNumberToCssDimension(width),
+          height: layoutNumberToCssDimension(height)
+        }}
+      >
+        <Component data={item} itemIdx={idx} isMeasuring={false} position={position} />
+      </div>
+    )
+
+    return virtualize ? (isVisible && itemComponent) || null : itemComponent
+  }
+
+  render() {
+    const { columnWidth, renderItem: Component, cache, items } = this.props
+
+    const {
+      hasPendingMeasurements,
+      height,
+      itemsToMeasure,
+      itemsToRender,
+      measuringPositions,
+      renderPositions,
       width
-    })
+    } = this.state
 
     let gridBody
     if (width == null && hasPendingMeasurements) {
@@ -266,8 +347,7 @@ class Masonry extends React.Component<Props, State> {
           style={{
             height: 0,
             width: '100%',
-            margin: '0 auto',
-            position: 'relative'
+            ...CONTAINER_STYLE
           }}
           ref={this.setGridWrapperRef}
         >
@@ -288,11 +368,12 @@ class Masonry extends React.Component<Props, State> {
                 }
               }}
             >
-              {React.createElement(Component, {
-                data: item,
-                itemIdx: i,
-                isMeasuring: false
-              })}
+              <Component
+                data={item}
+                itemIdx={i}
+                isMeasuring={false}
+                position={{ top: 0, height: 0, width: 0, left: 0 }}
+              />
             </div>
           ))}
         </div>
@@ -300,36 +381,27 @@ class Masonry extends React.Component<Props, State> {
     } else if (width == null) {
       gridBody = <div style={{ width: '100%' }} ref={this.setGridWrapperRef} />
     } else {
-      const itemsToRender = items.filter(item => item && cache.has(item))
-      const itemsToMeasure = items.filter(item => item && !cache.has(item)).slice(0, minCols)
-
-      const positions = measuredLayout(itemsToRender)
-
-      const measuringPositions = measuredLayout(itemsToMeasure)
-      const height = Math.max(...positions.map(pos => pos.top + pos.height))
       gridBody = (
         <div style={{ width: '100%' }} ref={this.setGridWrapperRef}>
           <div
             style={{
               height,
               width,
-              margin: '0 auto',
-              position: 'relative'
+              ...CONTAINER_STYLE
             }}
           >
-            {itemsToRender.map((item, i) => this.renderMasonryComponent(item, i, positions[i]))}
+            {itemsToRender.map((item, i) => this.renderMasonryComponent(item, i, renderPositions[i]))}
           </div>
           <div
             style={{
               height: '100%',
               width,
-              margin: '0 auto',
-              position: 'relative'
+              ...CONTAINER_STYLE
             }}
           >
             {itemsToMeasure.map((data, i) => {
-              const position = measuringPositions[i]
               const measurementIndex = itemsToRender.length + i
+              const position = measuringPositions[i]
               return (
                 <div
                   key={`measuring-${measurementIndex}`}
@@ -347,11 +419,7 @@ class Masonry extends React.Component<Props, State> {
                     }
                   }}
                 >
-                  {React.createElement(Component, {
-                    data: data,
-                    itemIdx: measurementIndex,
-                    isMeasuring: true
-                  })}
+                  <Component data={data} itemIdx={i} isMeasuring={false} position={position} />
                 </div>
               )
             })}

@@ -17,7 +17,7 @@ const offscreen = (width, height = Infinity) => ({
   height
 })
 
-export default ({
+export default <T>({
   cache,
   columnWidth,
   gutterWidth,
@@ -29,7 +29,7 @@ export default ({
   cache: any
   minCols?: number
   width?: number
-}) => (items: Array<any>): Array<Position> => {
+}) => (items: Array<T>): Array<Position> => {
   if (width == null) {
     return items.map(() => offscreen(columnWidth))
   }
@@ -40,9 +40,7 @@ export default ({
   const heights = new Array(columnCount).fill(0)
   const centerOffset = Math.max(Math.floor((width - columnWidthAndGutter * columnCount + gutterWidth) / 2), 0)
 
-  return items.reduce((acc, item) => {
-    const positions = acc
-
+  return items.reduce((positions, item) => {
     const height = cache.get(item)
     let position
 
