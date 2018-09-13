@@ -8,7 +8,7 @@ function generateItems(count) {
   for (let i = 0; i < count; i++) {
     items[i] = {
       aspect: 4 / (i + 1),
-      height: 100 + Math.random() * 100
+      height: 200
     }
   }
   return items

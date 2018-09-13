@@ -20,26 +20,26 @@ function getContentSize(
   let originWidth = 0
   for (let i = count - 1; i >= 0; i--) {
     let meta = items[offset + i]
-    originWidth += meta.aspect * options.lineGap
+    originWidth += meta.aspect * options.lineHeight
     if (i !== 0) {
       originWidth += gutterWidth
     }
   }
-  let fitHeight = (options.lineGap * rowWidth) / originWidth
-  let canFit = fitHeight <= options.maxLineGap && fitHeight >= options.minLineGap
+  let fitHeight = (options.lineHeight * rowWidth) / originWidth
+  let canFit = fitHeight <= options.maxLineHeight && fitHeight >= options.minLineHeight
   if (canFit) {
     return {
-      cost: Math.abs(options.lineGap - fitHeight),
+      cost: Math.abs(options.lineHeight - fitHeight),
       count: count,
       width: rowWidth,
       height: fitHeight
     }
   } else {
-    let height = originWidth > rowWidth ? options.minLineGap : options.maxLineGap
+    let height = originWidth > rowWidth ? options.minLineHeight : options.maxLineHeight
     return {
       cost: Infinity,
       count: count,
-      width: (originWidth * height) / options.lineGap,
+      width: (originWidth * height) / options.lineHeight,
       height: height
     }
   }
