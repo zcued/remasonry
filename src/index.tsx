@@ -12,6 +12,7 @@ interface Props<T> {
   columnWidth?: number
   minCols?: number
   gutterWidth?: number
+
   cache?: Cache<any>
   renderItem: (data: { data: T; itemIdx: number; position: Position; isMeasuring: boolean }) => JSX.Element
   items: Array<any>
@@ -51,7 +52,6 @@ const CONTAINER_STYLE: {
 function layoutClass<T>({ columnWidth, gutterWidth, layout, cache, minCols }: Props<T>, { width }: State<T>) {
   if (layout === 'horizontal') {
     return HorizontalLayout({
-      columnWidth,
       gutterWidth,
       minCols,
       width

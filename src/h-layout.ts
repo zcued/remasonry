@@ -20,7 +20,10 @@ function getContentSize(
   let originWidth = 0
   for (let i = count - 1; i >= 0; i--) {
     let meta = items[offset + i]
-    originWidth += meta.aspect * options.lineGap + gutterWidth
+    originWidth += meta.aspect * options.lineGap
+    if (i !== 0) {
+      originWidth += gutterWidth
+    }
   }
   let fitHeight = (options.lineGap * rowWidth) / originWidth
   let canFit = fitHeight <= options.maxLineGap && fitHeight >= options.minLineGap
@@ -50,7 +53,7 @@ function chooseFinalSize(lazySize: any, greedySize: any, rowWidth: number) {
   }
 }
 
-const offscreen = (width, height = Infinity) => ({
+const offscreen = (height, width = Infinity) => ({
   top: -9999,
   left: -9999,
   width,
@@ -58,32 +61,38 @@ const offscreen = (width, height = Infinity) => ({
 })
 
 export default ({
-  columnWidth,
+  singleMaxWidth = 256,
+  minLineHeight = 160,
+  maxLineHeight = 256,
   gutterWidth,
   width
 }: {
-  columnWidth?: number
+  singleMaxWidth?: number
+  minLineHeight?: number
+  maxLineHeight?: number
   gutterWidth?: number
   minCols?: number
   width?: number
 }) => (items: Array<any>): Array<Position> => {
+  const lineHeight = 200
   if (width == null) {
-    return items.map(() => offscreen(columnWidth))
+    return items.map(() => offscreen(lineHeight))
   }
 
   let total = items.length
   let top = 0
   let offset = 0
   let positions = []
+
   let options = {
-    lineGap: 200,
-    minLineGap: 184,
-    maxLineGap: 264,
-    singleMaxWidth: 264
+    lineHeight,
+    minLineHeight,
+    maxLineHeight,
+    singleMaxWidth
   }
 
   while (offset < total) {
-    let greedyCount = getGreedyCount(width, options.lineGap, items, offset, gutterWidth)
+    let greedyCount = getGreedyCount(width, options.lineHeight, items, offset, gutterWidth)
     let lazyCount = Math.max(greedyCount - 1, 1)
     let greedySize = getContentSize(width, options, items, offset, gutterWidth, greedyCount)
     let lazySize = getContentSize(width, options, items, offset, gutterWidth, lazyCount)
@@ -105,8 +114,8 @@ export default ({
       let position = {
         top,
         left: strategy.left + left,
-        width: strategy.height * meta.aspect,
-        height: strategy.height
+        width: Number((strategy.height * meta.aspect).toFixed(2)),
+        height: Number(strategy.height.toFixed(2))
       }
       positions.push(position)
       left += position.width + gutterWidth
