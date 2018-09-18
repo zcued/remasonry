@@ -101,7 +101,7 @@ export default ({
     let fitContentWidth = finalSize.width
     if (finalSize.count === 1) {
       fitContentWidth = Math.min(options.singleMaxWidth, width)
-      height = items[offset].aspect * fitContentWidth
+      height = fitContentWidth / items[offset].aspect
     }
     let strategy = {
       left: 0,
