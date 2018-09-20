@@ -1,6 +1,6 @@
 {
   "name": "remasonry",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "a grid layout library with react",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -12,6 +12,9 @@
   "peerDependencies": {
     "react": "^16.3.1",
     "react-dom": "^16.3.1"
+  },
+  "dependencies": {
+    "justified-layout": "^2.1.1"
   },
   "devDependencies": {
     "@types/react": "^16.4.1",

@@ -28,7 +28,6 @@ interface State<T> {
   isFetching: boolean
   scrollTop: number
   width?: number
-
   height: number
   itemsToMeasure: Array<T>
   itemsToRender: Array<T>
