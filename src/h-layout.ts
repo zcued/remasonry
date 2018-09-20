@@ -19,6 +19,7 @@ export default ({ gutterWidth, width }: { gutterWidth?: number; minCols?: number
   }
 
   const geometry = layoutGeometry(items.map(item => parseFloat(item.aspect)), {
+    containerWidth: width,
     boxSpacing: gutterWidth,
     targetRowHeight: lineHeight,
     containerPadding: 0,
