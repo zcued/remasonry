@@ -9,9 +9,16 @@ const offscreen = (height, width = Infinity) => ({
   height
 })
 
-export default ({ gutterWidth, width }: { gutterWidth?: number; minCols?: number; width?: number }) => (
-  items: Array<any>
-): Array<Position> => {
+export default ({
+  gutterWidth,
+  width,
+  maxNumRows = Number.POSITIVE_INFINITY
+}: {
+  gutterWidth?: number
+  minCols?: number
+  width?: number
+  maxNumRows?: number
+}) => (items: Array<any>): Array<Position> => {
   const lineHeight = 200
 
   if (width == null) {
@@ -23,7 +30,8 @@ export default ({ gutterWidth, width }: { gutterWidth?: number; minCols?: number
     boxSpacing: gutterWidth,
     targetRowHeight: lineHeight,
     containerPadding: 0,
-    resize: false
+    resize: false,
+    maxNumRows
   })
 
   return geometry.boxes

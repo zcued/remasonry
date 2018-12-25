@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Remasonry from 'remasonry'
 
-const items = generateItems(4)
+const items = generateItems(15)
 
 function generateItems(count) {
   let items = []
@@ -21,10 +21,10 @@ class App extends Component {
     this.setState({ isHorizontal: !this.state.isHorizontal })
   }
 
-  renderHorizontalItem({ position, itemIdx }) {
+  renderHorizontalItem({ itemIdx }) {
     return (
       <div className="marsonry-item" key={itemIdx}>
-        <div style={{ height: position.height }} />
+        {itemIdx}
       </div>
     )
   }
@@ -46,9 +46,15 @@ class App extends Component {
         <button onClick={this.handleToggle}>👉 Toggle 👈</button>
         <section>
           {isHorizontal ? (
-            <Remasonry items={items} layout="horizontal" gutterWidth={8} renderItem={this.renderHorizontalItem} />
+            <Remasonry
+              items={items}
+              layout="horizontal"
+              gutterWidth={8}
+              maxNumRows={1}
+              renderItem={this.renderHorizontalItem}
+            />
           ) : (
-            <Remasonry items={items} scrollContainer={() => window} renderItem={this.renderItem} />
+            <Remasonry items={items} renderItem={this.renderItem} />
           )}
         </section>
       </main>
