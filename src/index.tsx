@@ -239,7 +239,6 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
 
   componentDidUpdate({  }: Props<T>, prevState: State<T>) {
     const { items, cache } = this.props
-    debugger
     this.measureContainerAsync()
 
     if (prevState.width != null && this.state.width !== prevState.width) {
