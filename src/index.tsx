@@ -52,9 +52,11 @@ const layoutNumberToCssDimension = n => (n !== Infinity ? n : undefined) // tsli
 const CONTAINER_STYLE: {
   position: any
   overflow: any
+  display: any
 } = {
   position: 'relative',
-  overflow: 'hidden'
+  overflow: 'hidden',
+  display: 'block'
 }
 
 function layoutClass<T>(
@@ -220,10 +222,6 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
   componentDidMount() {
     window.addEventListener('resize', this.handleResize)
 
-    const width = this.gridWrapper
-      ? this.gridWrapper.clientWidth
-      : this.state.width
-
     this.measureContainer()
 
     let { scrollTop } = this.state
@@ -234,6 +232,11 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
       }
     }
 
+    const width = this.gridWrapper
+      ? this.gridWrapper.clientWidth || this.gridWrapper.offsetWidth
+      : this.state.width
+
+    this.handleResize()
     this.setState({ scrollTop, width })
   }
 
