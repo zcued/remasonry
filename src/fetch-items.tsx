@@ -7,6 +7,7 @@ interface Props {
   fetchMore?: Function
   scrollHeight: number
   scrollTop: number
+  customScrollBuffer?: number
 }
 
 export default class FetchItems extends React.PureComponent<Props> {
@@ -19,13 +20,21 @@ export default class FetchItems extends React.PureComponent<Props> {
   }
 
   check = () => {
-    const { containerHeight, isAtEnd, isFetching, fetchMore, scrollHeight, scrollTop } = this.props
+    const {
+      containerHeight,
+      isAtEnd,
+      isFetching,
+      fetchMore,
+      scrollHeight,
+      scrollTop,
+      customScrollBuffer
+    } = this.props
 
     if (isAtEnd || isFetching || !fetchMore) {
       return
     }
 
-    const scrollBuffer = containerHeight * 3
+    const scrollBuffer = customScrollBuffer || containerHeight * 3
 
     if (scrollTop + scrollBuffer > scrollHeight) {
       fetchMore()

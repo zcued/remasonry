@@ -50,7 +50,6 @@ class App extends Component {
               items={items}
               layout="horizontal"
               gutterWidth={8}
-              maxNumRows={1}
               renderItem={this.renderHorizontalItem}
             />
           ) : (
