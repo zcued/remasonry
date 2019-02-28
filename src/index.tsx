@@ -463,6 +463,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
                 }}
               >
                 <Component
+                  key={`measuring-${measurementIndex}-component`}
                   data={data}
                   itemIdx={i}
                   isMeasuring={false}
