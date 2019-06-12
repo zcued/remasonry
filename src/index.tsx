@@ -31,6 +31,8 @@ interface Props<T> {
   items: Array<any>
   loadItems?: Function
   virtualize?: boolean
+  /** 使用left，top 代替 transform  */
+  useTransform?: boolean
   layout: 'default' | 'horizontal'
   scrollContainer?: () => HTMLElement | Window
 }
@@ -120,7 +122,8 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     minCols: 4,
     gutterWidth: 16,
     virtualize: false,
-    layout: 'default'
+    layout: 'default',
+    useTransform: true
   }
 
   state = {
@@ -323,7 +326,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
       return null
     }
 
-    const { renderItem: Component, virtualize } = this.props
+    const { renderItem: Component, virtualize, useTransform } = this.props
     const { top, left, width, height } = position
 
     let isVisible
@@ -342,20 +345,26 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
       isVisible = true
     }
 
+    let itemStyle: any = {
+      top: 0,
+      left: 0,
+      position: 'absolute',
+      width: layoutNumberToCssDimension(width),
+      height: layoutNumberToCssDimension(height)
+    }
+
+    if (useTransform) {
+      const transform = `translateX(${left}px) translateY(${top}px)`
+      itemStyle.transition = 'transform 0.2s'
+      itemStyle.transform = transform
+      itemStyle.WebkitTransform = transform
+    } else {
+      itemStyle.left = left
+      itemStyle.top = top
+    }
+
     const itemComponent = (
-      <div
-        key={`item-${idx}`}
-        style={{
-          top: 0,
-          left: 0,
-          position: 'absolute',
-          transition: 'transform 0.2s',
-          transform: `translateX(${left}px) translateY(${top}px)`,
-          WebkitTransform: `translateX(${left}px) translateY(${top}px)`,
-          width: layoutNumberToCssDimension(width),
-          height: layoutNumberToCssDimension(height)
-        }}
-      >
+      <div key={`item-${idx}`} style={itemStyle}>
         <Component
           data={item}
           itemIdx={idx}
