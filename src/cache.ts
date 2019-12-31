@@ -9,11 +9,11 @@ export default class Cache<T extends object> {
     return this.map.get(key)
   }
 
-  has(key): boolean {
+  has(key: T): boolean {
     return this.map.has(key)
   }
 
-  set(key, value): void {
+  set(key: T, value: any): void {
     this.map.set(key, value)
   }
 

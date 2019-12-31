@@ -2,11 +2,11 @@ import * as React from 'react'
 
 interface Props {
   containerHeight: number
-  isAtEnd?: boolean
   isFetching: boolean
-  fetchMore?: Function
   scrollHeight: number
   scrollTop: number
+  isAtEnd?: boolean
+  fetchMore?: Function
   customScrollBuffer?: number
 }
 

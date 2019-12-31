@@ -1,14 +1,47 @@
 {
   "name": "remasonry",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "a grid layout library with react",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "index.cjs.js",
+  "module": "index.js",
+  "types": "index.d.ts",
   "files": [
-    "lib"
+    "**"
   ],
+  "sideEffects": false,
   "repository": "git@github.com:zcued/remasonry.git",
   "license": "MIT",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "jest",
+      "legacy"
+    ],
+    "testRegex": "test.(js|ts|tsx)$",
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true,
+    "coverageReporters": [
+      "json",
+      "html",
+      "text",
+      "text-summary"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{js,ts,tsx}",
+      "tests/**/*.{js,ts,tsx}"
+    ]
+  },
   "peerDependencies": {
     "react": "^16.3.1",
     "react-dom": "^16.3.1"
@@ -17,10 +50,34 @@
     "justified-layout": "^2.1.1"
   },
   "devDependencies": {
-    "@types/react": "^16.4.1",
-    "typescript": "^2.9.2"
+    "@babel/core": "^7.7.4",
+    "@babel/plugin-transform-react-jsx": "^7.7.4",
+    "@babel/plugin-transform-typescript": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@testing-library/react": "^9.4.0",
+    "@types/jest": "^24.0.23",
+    "@types/react": "^16.9.11",
+    "copyfiles": "^2.1.1",
+    "husky": "^3.1.0",
+    "jest": "^24.9.0",
+    "json": "^9.0.6",
+    "lint-staged": "^9.4.3",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.2",
+    "rimraf": "^3.0.0",
+    "rollup": "^1.27.5",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-size-snapshot": "^0.10.0",
+    "rollup-plugin-typescript2": "^0.25.2"
   },
   "scripts": {
-    "build": "tsc"
+    "prebuild": "rimraf dist",
+    "build": "rollup -c && yarn copy",
+    "pretest": "tsc tests/test.tsx --noEmit --jsx preserve -m None -t ESNext --isolatedModules --esModuleInterop --skipLibCheck",
+    "test": "jest",
+    "test:dev": "jest --watch --no-coverage",
+    "test:coverage:watch": "jest --watch",
+    "copy": "copyfiles -f package.json readme.md LICENSE dist && json -I -f dist/package.json -e \"this.private=false; this.devDependencies=undefined; this.optionalDependencies=undefined; this.scripts=undefined; this.husky=undefined; this.prettier=undefined; this.jest=undefined; this['lint-staged']=undefined;\""
   }
 }

@@ -1,0 +1,22 @@
+{
+  "name": "remasonry",
+  "version": "1.0.0",
+  "description": "a grid layout library with react",
+  "main": "index.cjs.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "**"
+  ],
+  "sideEffects": false,
+  "repository": "git@github.com:zcued/remasonry.git",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1"
+  },
+  "dependencies": {
+    "justified-layout": "^2.1.1"
+  },
+  "private": false
+}

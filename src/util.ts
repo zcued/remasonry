@@ -8,7 +8,7 @@ export const throttle = (fn: () => void, wait: number = 0): F => {
 
   const throttled: any = (...args) => {
     if (!inThrottle) {
-      fn.apply(this, args)
+      fn.apply(null, args)
       lastTime = Date.now()
       inThrottle = true
     } else {

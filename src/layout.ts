@@ -1,6 +1,6 @@
 type Position = { top: number; left: number; width: number; height: number }
 
-const mindex = arr => {
+const mIndex = (arr: number[]) => {
   let idx = 0
   for (let i = 0; i < arr.length; i++) {
     if (arr[i] < arr[idx]) {
@@ -10,7 +10,7 @@ const mindex = arr => {
   return idx
 }
 
-const offscreen = (width, height = Infinity) => ({
+const offscreen = (width: number, height: number = Infinity) => ({
   top: -9999,
   left: -9999,
   width,
@@ -29,7 +29,7 @@ export default <T>({
   cache: any
   minCols?: number
   width?: number
-}) => (items: Array<T>): Array<Position> => {
+}) => (items: T[]): Position[] => {
   if (width == null) {
     return items.map(() => offscreen(columnWidth))
   }
@@ -38,7 +38,10 @@ export default <T>({
   const columnCount = Math.max(Math.floor((width + gutterWidth) / columnWidthAndGutter), minCols)
 
   const heights = new Array(columnCount).fill(0)
-  const centerOffset = Math.max(Math.floor((width - columnWidthAndGutter * columnCount + gutterWidth) / 2), 0)
+  const centerOffset = Math.max(
+    Math.floor((width - columnWidthAndGutter * columnCount + gutterWidth) / 2),
+    0
+  )
 
   return items.reduce((positions, item) => {
     const height = cache.get(item)
@@ -48,7 +51,7 @@ export default <T>({
       position = offscreen(columnWidth)
     } else {
       const heightAndGutter = height + gutterWidth
-      const col = mindex(heights)
+      const col = mIndex(heights)
       const top = heights[col]
       const left = col * columnWidthAndGutter + centerOffset
 
