@@ -1,6 +1,6 @@
 {
   "name": "remasonry",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.2",
   "description": "a grid layout library with react",
   "main": "index.cjs.js",
   "module": "index.js",
@@ -63,13 +63,13 @@
     "json": "^9.0.6",
     "lint-staged": "^9.4.3",
     "prettier": "^1.19.1",
-    "typescript": "^3.7.2",
     "rimraf": "^3.0.0",
     "rollup": "^1.27.5",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-size-snapshot": "^0.10.0",
-    "rollup-plugin-typescript2": "^0.25.2"
+    "rollup-plugin-typescript2": "^0.25.2",
+    "typescript": "^3.7.2"
   },
   "scripts": {
     "prebuild": "rimraf dist",
