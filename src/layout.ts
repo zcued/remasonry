@@ -1,5 +1,4 @@
-type Position = { top: number; left: number; width: number; height: number }
-
+import { Position, BoxSpacing } from './types'
 const mIndex = (arr: number[]) => {
   let idx = 0
   for (let i = 0; i < arr.length; i++) {
@@ -25,7 +24,7 @@ export default <T>({
   width
 }: {
   columnWidth?: number
-  gutterWidth?: number
+  gutterWidth?: number | BoxSpacing
   cache: any
   minCols?: number
   width?: number
@@ -33,13 +32,16 @@ export default <T>({
   if (width == null) {
     return items.map(() => offscreen(columnWidth))
   }
-
-  const columnWidthAndGutter = columnWidth + gutterWidth
-  const columnCount = Math.max(Math.floor((width + gutterWidth) / columnWidthAndGutter), minCols)
+  const currentGutterWidth = typeof gutterWidth === 'number' ? gutterWidth : 0
+  const columnWidthAndGutter = columnWidth + currentGutterWidth
+  const columnCount = Math.max(
+    Math.floor((width + currentGutterWidth) / columnWidthAndGutter),
+    minCols
+  )
 
   const heights = new Array(columnCount).fill(0)
   const centerOffset = Math.max(
-    Math.floor((width - columnWidthAndGutter * columnCount + gutterWidth) / 2),
+    Math.floor((width - columnWidthAndGutter * columnCount + currentGutterWidth) / 2),
     0
   )
 
@@ -50,7 +52,7 @@ export default <T>({
     if (height == null) {
       position = offscreen(columnWidth)
     } else {
-      const heightAndGutter = height + gutterWidth
+      const heightAndGutter = height + currentGutterWidth
       const col = mIndex(heights)
       const top = heights[col]
       const left = col * columnWidthAndGutter + centerOffset
