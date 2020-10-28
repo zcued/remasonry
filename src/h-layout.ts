@@ -36,7 +36,6 @@ export default ({
       boxSpacing: gutterWidth,
       targetRowHeight: lineHeight,
       containerPadding: 0,
-      resize: false,
       maxNumRows
     }
   )

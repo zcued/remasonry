@@ -47,7 +47,7 @@
     "react-dom": "^16.3.1"
   },
   "dependencies": {
-    "justified-layout": "^2.1.1"
+    "@types/justified-layout": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
