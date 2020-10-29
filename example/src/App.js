@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Remasonry from 'remasonry'
+import Remasonry from '../../dist'
 
 const items = generateItems(15)
 

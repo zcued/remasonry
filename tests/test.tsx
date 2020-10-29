@@ -32,8 +32,4 @@ it('should render Masonry with correct DOM structure', () => {
       )}
     />
   )
-
-  debug(getByTestId('Masonry-0'))
-
-  // TODO
 })

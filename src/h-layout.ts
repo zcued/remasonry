@@ -1,6 +1,5 @@
 import layoutGeometry from 'justified-layout'
-
-type Position = { top: number; left: number; width: number; height: number }
+import { Position, BoxSpacing } from './types'
 
 const offscreen = (height: number, width: number = Infinity) => ({
   top: -9999,
@@ -14,7 +13,7 @@ export default ({
   width,
   maxNumRows = Number.POSITIVE_INFINITY
 }: {
-  gutterWidth?: number
+  gutterWidth?: number | BoxSpacing
   minCols?: number
   width?: number
   maxNumRows?: number
@@ -37,7 +36,6 @@ export default ({
       boxSpacing: gutterWidth,
       targetRowHeight: lineHeight,
       containerPadding: 0,
-      resize: false,
       maxNumRows
     }
   )
