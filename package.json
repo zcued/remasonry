@@ -81,7 +81,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c && yarn copy",
-    "pretest": "tsc tests/test.tsx --noEmit --jsx preserve -m None -t ESNext --isolatedModules --esModuleInterop --skipLibCheck",
+    "pretest": "tsc tests/test.tsx --noEmit --jsx preserve -m None -t ESNext --isolatedModules --esModuleInterop --skipLibCheck && yarn run build",
     "test": "jest",
     "test:dev": "jest --watch --no-coverage",
     "test:coverage:watch": "jest --watch",
