@@ -1,6 +1,6 @@
 {
   "name": "remasonry",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.1-alpha.1",
   "description": "a grid layout library with react",
   "main": "index.cjs.js",
   "module": "index.js",

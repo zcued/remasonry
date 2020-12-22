@@ -139,7 +139,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
 
   handleResize = debounce(() => {
     if (this.gridWrapper) {
-      this.setState({ width: this.gridWrapper.clientWidth })
+      this.setState({ width: this.gridWrapper.clientWidth || this.gridWrapper.offsetWidth })
     }
   }, RESIZE_DEBOUNCE)
 
@@ -228,19 +228,15 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
       }
     }
 
-    const width = this.gridWrapper
-      ? this.gridWrapper.clientWidth || this.gridWrapper.offsetWidth
-      : this.state.width
-
     this.handleResize()
-    this.setState({ scrollTop, width })
+    this.setState({ scrollTop })
   }
 
   componentDidUpdate({}: Props<T>, prevState: State<T>) {
     const { items, cache } = this.props
     this.measureContainerAsync()
 
-    if (prevState.width != null && this.state.width !== prevState.width) {
+    if (this.state.width !== prevState.width) {
       cache.reset()
     }
     // calculate whether we still have pending measurements
