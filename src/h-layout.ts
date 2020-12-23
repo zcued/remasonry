@@ -29,7 +29,7 @@ export default ({
       if (typeof item.aspect === 'string') {
         return parseFloat(item.aspect) || 1
       }
-      return item.aspect
+      return item.aspect || item
     }),
     {
       containerWidth: width,

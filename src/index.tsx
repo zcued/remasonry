@@ -1,4 +1,5 @@
 import * as React from 'react'
+import ResizeObserver from 'resize-observer-polyfill'
 import { debounce, throttle, getElementHeight, getRelativeScrollTop, getScrollPos } from './util'
 import DefaultLayout from './layout'
 import HorizontalLayout from './h-layout'
@@ -130,6 +131,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     width: undefined
   }
 
+  resizeObserver = null
   containerHeight: number = 0
   containerOffset: number = 0
   gridWrapper?: HTMLElement
@@ -216,7 +218,13 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this.handleResize)
+    this.resizeObserver = new ResizeObserver(() => {
+      this.handleResize()
+    })
+
+    setTimeout(() => {
+      this.resizeObserver.observe(this.gridWrapper)
+    }, 0)
 
     this.measureContainer()
 
@@ -270,8 +278,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     this.measureContainerAsync.cancel()
     this.handleResize.cancel()
     this.updateScrollPosition.cancel()
-
-    window.removeEventListener('resize', this.handleResize)
+    this.resizeObserver.disconnect()
   }
 
   setGridWrapperRef = (ref?: HTMLElement) => {

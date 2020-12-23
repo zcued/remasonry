@@ -1,6 +1,6 @@
 {
   "name": "remasonry",
-  "version": "1.0.1-alpha.1",
+  "version": "1.0.1-beta.9",
   "description": "a grid layout library with react",
   "main": "index.cjs.js",
   "module": "index.js",
@@ -50,7 +50,8 @@
     "react-dom": "^16.3.1"
   },
   "dependencies": {
-    "justified-layout": "^2.1.1"
+    "justified-layout": "^2.1.1",
+    "resize-observer-polyfill": "^1.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
@@ -86,7 +87,7 @@
     "test:coverage:watch": "jest --watch",
     "copy": "copyfiles -f package.json readme.md LICENSE dist && json -I -f dist/package.json -e \"this.private=false; this.devDependencies=undefined; this.optionalDependencies=undefined; this.scripts=undefined; this.husky=undefined; this.prettier=undefined; this.jest=undefined; this['lint-staged']=undefined;\"",
     "prerelease": "yarn build",
-    "release": "cd dist && yarn publish",
+    "release": "yarn publish dist/ --no-git-tag-version",
     "prepare": "install-peers"
   }
 }
