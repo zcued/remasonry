@@ -9,16 +9,17 @@ const offscreen = (height: number, width: number = Infinity) => ({
 })
 
 export default ({
+  rowHeight,
   gutterWidth,
   width,
   maxNumRows = Number.POSITIVE_INFINITY
 }: {
+  rowHeight?: number
   gutterWidth?: number | BoxSpacing
-  minCols?: number
   width?: number
   maxNumRows?: number
 }) => (items: any[]): Position[] => {
-  const lineHeight = 200
+  const lineHeight = rowHeight || 200
 
   if (width == null) {
     return items.map(() => offscreen(lineHeight))

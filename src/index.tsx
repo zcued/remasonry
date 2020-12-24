@@ -9,6 +9,7 @@ import FetchItems from './fetch-items'
 import { Position, BoxSpacing } from './types'
 
 interface Props<T> {
+  rowHeight?: number
   columnWidth?: number
   minCols?: number
   gutterWidth?: number | BoxSpacing
@@ -60,13 +61,13 @@ const CONTAINER_STYLE: {
 }
 
 function layoutClass<T>(
-  { columnWidth, gutterWidth, layout, cache, minCols, maxNumRows }: Props<T>,
+  { columnWidth, rowHeight, gutterWidth, layout, cache, minCols, maxNumRows }: Props<T>,
   { width }: State<T>
 ) {
   if (layout === 'horizontal') {
     return HorizontalLayout({
+      rowHeight,
       gutterWidth,
-      minCols,
       width,
       maxNumRows
     })
@@ -240,8 +241,8 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     this.setState({ scrollTop })
   }
 
-  componentDidUpdate({}: Props<T>, prevState: State<T>) {
-    const { items, cache } = this.props
+  componentDidUpdate(prevProps: Props<T>, prevState: State<T>) {
+    const { items, cache, columnWidth, rowHeight } = this.props
     this.measureContainerAsync()
 
     if (this.state.width !== prevState.width) {
@@ -262,7 +263,12 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
           ...renderingStates
         })
       })
-    } else if (hasPendingMeasurements || prevState.items !== items) {
+    } else if (
+      hasPendingMeasurements ||
+      prevState.items !== items ||
+      prevProps.columnWidth !== columnWidth ||
+      prevProps.rowHeight !== rowHeight
+    ) {
       this.insertAnimationFrame = requestAnimationFrame(() => {
         const renderingStates = statesForRendering(this.props, this.state)
         this.setState({ ...renderingStates })
