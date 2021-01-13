@@ -61,7 +61,7 @@ const CONTAINER_STYLE: {
 }
 
 function layoutClass<T>(
-  { columnWidth, rowHeight, gutterWidth, layout, cache, minCols, maxNumRows }: Props<T>,
+  { columnWidth, rowHeight, gutterWidth, layout, minCols, maxNumRows }: Props<T>,
   { width }: State<T>
 ) {
   if (layout === 'horizontal') {
@@ -74,7 +74,6 @@ function layoutClass<T>(
   }
 
   return DefaultLayout<T>({
-    cache,
     columnWidth,
     gutterWidth,
     minCols,

@@ -9,7 +9,7 @@ const mIndex = (arr: number[]) => {
   return idx
 }
 
-const offscreen = (width: number, height: number = Infinity) => ({
+const offscreen = (width: number, height: number = 0) => ({
   top: -9999,
   left: -9999,
   width,
@@ -17,7 +17,6 @@ const offscreen = (width: number, height: number = Infinity) => ({
 })
 
 export default <T>({
-  cache,
   columnWidth,
   gutterWidth,
   minCols,
@@ -25,40 +24,38 @@ export default <T>({
 }: {
   columnWidth?: number
   gutterWidth?: number | BoxSpacing
-  cache: any
   minCols?: number
   width?: number
 }) => (items: T[]): Position[] => {
   if (width == null) {
     return items.map(() => offscreen(columnWidth))
   }
-  const currentGutterWidth = typeof gutterWidth === 'number' ? gutterWidth : 0
+  const currentGutterWidth = typeof gutterWidth === 'object' ? gutterWidth.horizontal : gutterWidth
+  const currentGutterheight = typeof gutterWidth === 'object' ? gutterWidth.vertical : gutterWidth
   const columnWidthAndGutter = columnWidth + currentGutterWidth
   const columnCount = Math.max(
     Math.floor((width + currentGutterWidth) / columnWidthAndGutter),
     minCols
   )
 
+  const realColumnWidth = Math.floor((width - currentGutterWidth * (columnCount - 1)) / columnCount)
   const heights = new Array(columnCount).fill(0)
-  const centerOffset = Math.max(
-    Math.floor((width - columnWidthAndGutter * columnCount + currentGutterWidth) / 2),
-    0
-  )
 
-  return items.reduce((positions, item) => {
-    const height = cache.get(item)
+  return items.reduce((positions, item: any) => {
+    const aspect = item.aspect ? Number(item.aspect) : item.width / item.height
+    const height = realColumnWidth / aspect
     let position
 
     if (height == null) {
-      position = offscreen(columnWidth)
+      position = offscreen(realColumnWidth)
     } else {
-      const heightAndGutter = height + currentGutterWidth
+      const heightAndGutter = height + currentGutterheight
       const col = mIndex(heights)
       const top = heights[col]
-      const left = col * columnWidthAndGutter + centerOffset
+      const left = col * (realColumnWidth + currentGutterWidth)
 
       heights[col] += heightAndGutter
-      position = { top, left, width: columnWidth, height }
+      position = { top, left, width: realColumnWidth, height }
     }
     positions.push(position)
     return positions

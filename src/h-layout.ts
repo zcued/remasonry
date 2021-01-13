@@ -1,7 +1,7 @@
 import layoutGeometry from 'justified-layout'
 import { Position, BoxSpacing } from './types'
 
-const offscreen = (height: number, width: number = Infinity) => ({
+const offscreen = (height: number, width: number = 0) => ({
   top: -9999,
   left: -9999,
   width,
