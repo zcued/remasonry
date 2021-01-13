@@ -82,7 +82,7 @@ function layoutClass<T>(
 }
 
 function statesForRendering<T>(props: Props<T>, state: State<T>) {
-  const { cache, minCols } = props
+  const { cache, minCols, gutterWidth } = props
   const { items } = state
 
   // Full layout is possible
@@ -91,8 +91,11 @@ function statesForRendering<T>(props: Props<T>, state: State<T>) {
   const layout = layoutClass(props, state)
   const renderPositions = layout(itemsToRender)
   // Math.max() === -Infinity when there are no renderPositions
+
+  const gutterHeight = typeof gutterWidth === 'object' ? gutterWidth.vertical : gutterWidth
+
   const height = renderPositions.length
-    ? Math.max(...renderPositions.map(pos => pos.top + pos.height))
+    ? Math.max(...renderPositions.map(pos => pos.top + pos.height + gutterHeight))
     : 0
 
   const itemsToMeasure = items.filter(item => item && !cache.has(item)).slice(0, minCols)
