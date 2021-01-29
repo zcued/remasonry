@@ -1,4 +1,5 @@
 import * as React from 'react'
+import ResizeObserver from 'resize-observer-polyfill'
 import { debounce, throttle, getElementHeight, getRelativeScrollTop, getScrollPos } from './util'
 import DefaultLayout from './layout'
 import HorizontalLayout from './h-layout'
@@ -8,6 +9,7 @@ import FetchItems from './fetch-items'
 import { Position, BoxSpacing } from './types'
 
 interface Props<T> {
+  rowHeight?: number
   columnWidth?: number
   minCols?: number
   gutterWidth?: number | BoxSpacing
@@ -59,20 +61,19 @@ const CONTAINER_STYLE: {
 }
 
 function layoutClass<T>(
-  { columnWidth, gutterWidth, layout, cache, minCols, maxNumRows }: Props<T>,
+  { columnWidth, rowHeight, gutterWidth, layout, minCols, maxNumRows }: Props<T>,
   { width }: State<T>
 ) {
   if (layout === 'horizontal') {
     return HorizontalLayout({
+      rowHeight,
       gutterWidth,
-      minCols,
       width,
       maxNumRows
     })
   }
 
   return DefaultLayout<T>({
-    cache,
     columnWidth,
     gutterWidth,
     minCols,
@@ -81,7 +82,7 @@ function layoutClass<T>(
 }
 
 function statesForRendering<T>(props: Props<T>, state: State<T>) {
-  const { cache, minCols } = props
+  const { cache, minCols, gutterWidth } = props
   const { items } = state
 
   // Full layout is possible
@@ -90,8 +91,11 @@ function statesForRendering<T>(props: Props<T>, state: State<T>) {
   const layout = layoutClass(props, state)
   const renderPositions = layout(itemsToRender)
   // Math.max() === -Infinity when there are no renderPositions
+
+  const gutterHeight = typeof gutterWidth === 'object' ? gutterWidth.vertical : gutterWidth
+
   const height = renderPositions.length
-    ? Math.max(...renderPositions.map(pos => pos.top + pos.height))
+    ? Math.max(...renderPositions.map(pos => pos.top + pos.height + gutterHeight))
     : 0
 
   const itemsToMeasure = items.filter(item => item && !cache.has(item)).slice(0, minCols)
@@ -130,6 +134,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     width: undefined
   }
 
+  resizeObserver = null
   containerHeight: number = 0
   containerOffset: number = 0
   gridWrapper?: HTMLElement
@@ -216,7 +221,13 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this.handleResize)
+    this.resizeObserver = new ResizeObserver(() => {
+      this.handleResize()
+    })
+
+    setTimeout(() => {
+      this.resizeObserver.observe(this.gridWrapper)
+    }, 0)
 
     this.measureContainer()
 
@@ -232,8 +243,8 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     this.setState({ scrollTop })
   }
 
-  componentDidUpdate({}: Props<T>, prevState: State<T>) {
-    const { items, cache } = this.props
+  componentDidUpdate(prevProps: Props<T>, prevState: State<T>) {
+    const { items, cache, columnWidth, rowHeight } = this.props
     this.measureContainerAsync()
 
     if (this.state.width !== prevState.width) {
@@ -254,7 +265,12 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
           ...renderingStates
         })
       })
-    } else if (hasPendingMeasurements || prevState.items !== items) {
+    } else if (
+      hasPendingMeasurements ||
+      prevState.items !== items ||
+      prevProps.columnWidth !== columnWidth ||
+      prevProps.rowHeight !== rowHeight
+    ) {
       this.insertAnimationFrame = requestAnimationFrame(() => {
         const renderingStates = statesForRendering(this.props, this.state)
         this.setState({ ...renderingStates })
@@ -270,8 +286,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     this.measureContainerAsync.cancel()
     this.handleResize.cancel()
     this.updateScrollPosition.cancel()
-
-    window.removeEventListener('resize', this.handleResize)
+    this.resizeObserver.disconnect()
   }
 
   setGridWrapperRef = (ref?: HTMLElement) => {

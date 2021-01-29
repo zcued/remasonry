@@ -1,7 +1,7 @@
 import layoutGeometry from 'justified-layout'
 import { Position, BoxSpacing } from './types'
 
-const offscreen = (height: number, width: number = Infinity) => ({
+const offscreen = (height: number, width: number = 0) => ({
   top: -9999,
   left: -9999,
   width,
@@ -9,16 +9,17 @@ const offscreen = (height: number, width: number = Infinity) => ({
 })
 
 export default ({
+  rowHeight,
   gutterWidth,
   width,
   maxNumRows = Number.POSITIVE_INFINITY
 }: {
+  rowHeight?: number
   gutterWidth?: number | BoxSpacing
-  minCols?: number
   width?: number
   maxNumRows?: number
 }) => (items: any[]): Position[] => {
-  const lineHeight = 200
+  const lineHeight = rowHeight || 200
 
   if (width == null) {
     return items.map(() => offscreen(lineHeight))
@@ -29,7 +30,7 @@ export default ({
       if (typeof item.aspect === 'string') {
         return parseFloat(item.aspect) || 1
       }
-      return item.aspect
+      return item.aspect || item
     }),
     {
       containerWidth: width,

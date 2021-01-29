@@ -5,7 +5,8 @@
     "jsx": "preserve",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "moduleResolution": "Node",
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
