@@ -244,7 +244,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
   }
 
   componentDidUpdate(prevProps: Props<T>, prevState: State<T>) {
-    const { items, cache, columnWidth, rowHeight } = this.props
+    const { items, cache, columnWidth, rowHeight, gutterWidth } = this.props
     this.measureContainerAsync()
 
     if (this.state.width !== prevState.width) {
@@ -252,6 +252,11 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     }
     // calculate whether we still have pending measurements
     const hasPendingMeasurements = items.some(item => !!item && !cache.has(item))
+    const gutterWidthIsChange =
+      typeof gutterWidth === 'number'
+        ? prevProps.gutterWidth !== gutterWidth
+        : (prevProps.gutterWidth as BoxSpacing).horizontal !== gutterWidth.horizontal ||
+          (prevProps.gutterWidth as BoxSpacing).vertical !== gutterWidth.vertical
 
     if (
       hasPendingMeasurements ||
@@ -269,7 +274,8 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
       hasPendingMeasurements ||
       prevState.items !== items ||
       prevProps.columnWidth !== columnWidth ||
-      prevProps.rowHeight !== rowHeight
+      prevProps.rowHeight !== rowHeight ||
+      gutterWidthIsChange
     ) {
       this.insertAnimationFrame = requestAnimationFrame(() => {
         const renderingStates = statesForRendering(this.props, this.state)
