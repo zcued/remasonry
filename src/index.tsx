@@ -226,7 +226,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     })
 
     setTimeout(() => {
-      this.resizeObserver.observe(this.gridWrapper)
+      this.gridWrapper && this.resizeObserver.observe(this.gridWrapper)
     }, 0)
 
     this.measureContainer()
