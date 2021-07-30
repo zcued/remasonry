@@ -247,7 +247,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     const { items, cache, columnWidth, rowHeight, gutterWidth } = this.props
     this.measureContainerAsync()
 
-    if (this.state.width !== prevState.width) {
+    if (prevState.width && this.state.width !== prevState.width) {
       cache.reset()
     }
     // calculate whether we still have pending measurements
