@@ -42,7 +42,7 @@ export default <T>({
   const heights = new Array(columnCount).fill(0)
 
   return items.reduce((positions, item: any) => {
-    const aspect = item.aspect ? Number(item.aspect) : item.width / item.height
+    const aspect = (item.aspect ? Number(item.aspect) : item.width / item.height) || 1
     const height = realColumnWidth / aspect
     let position
 
