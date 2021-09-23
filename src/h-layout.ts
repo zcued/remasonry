@@ -27,10 +27,13 @@ export default ({
 
   const geometry = layoutGeometry(
     items.map(item => {
-      if (typeof item.aspect === 'string') {
-        return parseFloat(item.aspect) || 1
+      let aspect = Number(item.aspect)
+
+      if (!item.aspect && item.width && item.height) {
+        aspect = Number(item.width) / Number(item.height)
       }
-      return item.aspect || item
+
+      return aspect || 1
     }),
     {
       containerWidth: width,

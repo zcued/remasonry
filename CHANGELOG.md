@@ -6,3 +6,6 @@
 
 # 1.1.3
 - fix: 页面中同时有多个瀑布流时，共用一个cache，后渲染的瀑布流的cache.reset()会清掉所有cache，导致重新布局。
+
+# 1.1.4
+- fix: 如果原始数据没有aspect，也没有width和height，默认设为1
