@@ -1,5 +1,6 @@
 import * as React from 'react'
 import ResizeObserver from 'resize-observer-polyfill'
+import isEqual from 'lodash.isequal'
 import { debounce, throttle, getElementHeight, getRelativeScrollTop, getScrollPos } from './util'
 import DefaultLayout from './layout'
 import HorizontalLayout from './h-layout'
@@ -161,7 +162,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     this.setState({
       scrollTop: getScrollPos(scrollContainer)
     })
-  })
+  }, 300)
 
   measureContainerAsync = debounce(() => {
     this.measureContainer()
@@ -181,7 +182,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
         }
       }
 
-      if (items[i] !== state.items[i] || items.length < state.items.length) {
+      if (!isEqual(items[i], state.items[i]) || items.length < state.items.length) {
         return {
           hasPendingMeasurements,
           items,
@@ -272,7 +273,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
       })
     } else if (
       hasPendingMeasurements ||
-      prevState.items !== items ||
+      !isEqual(prevState.items, items) ||
       prevProps.columnWidth !== columnWidth ||
       prevProps.rowHeight !== rowHeight ||
       gutterWidthIsChange
@@ -293,6 +294,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
     this.handleResize.cancel()
     this.updateScrollPosition.cancel()
     this.resizeObserver.disconnect()
+    this.props.cache.reset()
   }
 
   setGridWrapperRef = (ref?: HTMLElement) => {
@@ -462,7 +464,7 @@ class Masonry<T> extends React.Component<Props<T>, State<T>> {
                 <Component
                   key={`measuring-${measurementIndex}-component`}
                   data={data}
-                  itemIdx={i}
+                  itemIdx={measurementIndex}
                   isMeasuring={false}
                   position={position}
                 />
