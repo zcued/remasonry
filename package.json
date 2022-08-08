@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "justified-layout": "^2.1.1",
+    "lodash.isequal": "^4.5.0",
     "resize-observer-polyfill": "^1.5.1"
   },
   "devDependencies": {
